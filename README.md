@@ -1,0 +1,4 @@
+ajaxedit
+========
+
+Dokuwiki Plugin
