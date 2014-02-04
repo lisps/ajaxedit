@@ -47,7 +47,7 @@ class helper_plugin_ajaxedit extends DokuWiki_Plugin {
 		);
 		
 		echo json_encode($ret);
-		if($exit) exit;
+		if($exit && !DOKU_UNITTEST) exit;
 	}
 	
 	function _error($type,$exit = true){
@@ -58,7 +58,7 @@ class helper_plugin_ajaxedit extends DokuWiki_Plugin {
 		);
 		
 		echo json_encode($ret);
-		if($exit) exit;
+		if($exit && !DOKU_UNITTEST) exit;
 	}
 	
 	/**
@@ -70,10 +70,10 @@ class helper_plugin_ajaxedit extends DokuWiki_Plugin {
 		global $INFO;
 		$this->ID=cleanID(trim($_POST["pageid"]));
 
-		$ID		 = $this->ID;
+		$ID = $this->ID;
 		$this->index = intval($_POST["index"]);
 		
-		$oldrev	 = intval($_POST["lastmod"]);
+		$oldrev = intval($_POST["lastmod"]);
 		
 		if(!checkSecurityToken()) $this->_error(self::ERROR_SECTOC);
 		

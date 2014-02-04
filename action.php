@@ -26,5 +26,8 @@ class action_plugin_ajaxedit extends DokuWiki_Action_Plugin {
 		$info = pageinfo();
 		$JSINFO['lastmod'] = $info["lastmod"];
 		$JSINFO['sectok'] = getSecurityToken();
+        $perm = auth_quickaclcheck($ID);
+		if ($perm > AUTH_READ)
+			$JSINFO['acl_write'] = '1';
 	}
 }

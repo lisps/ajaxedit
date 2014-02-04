@@ -1,3 +1,4 @@
+/* DOKUWIKI:include_once vendor/pnotify/jquery.pnotify.js */
 /**
  * DokuWiki Plugin ajaxedit (JavaScript Component) 
  *
@@ -6,6 +7,37 @@
  */
 
 var LASTMOD = JSINFO?JSINFO['lastmod']:null;
+jQuery.pnotify.defaults.styling = "jqueryui";
+jQuery.pnotify.defaults.delay = 2000;
+jQuery.pnotify.defaults.history = false;
+
+
+var ajaxedit_queue_ = [];
+var ajaxedit_queue_working = false;
+function ajaxedit_queue(callback) {
+    ajaxedit_queue_.push(callback);
+    if(!ajaxedit_queue_working) {
+        ajaxedit_queue_working = true;
+        ajaexedit_queue_next();
+    }
+}
+function ajaexedit_queue_next(){
+    c = ajaxedit_queue_.pop();
+    if(c) c();
+    else  ajaxedit_queue_working = false;
+}
+
+function ajaxedit_send_(url,data,fcnSuccess) {
+    data['lastmod']=LASTMOD;
+    jQuery.post(
+		url,
+		data,
+		function(data) {
+            fcnSuccess(data);
+            ajaexedit_queue_next();  
+        }
+	);
+}
 
 /**
  * ajaxedit_send is a wrapper for jQuery's post function 
@@ -17,16 +49,14 @@ var LASTMOD = JSINFO?JSINFO['lastmod']:null;
  * @param hash     data additional data
  */
 function ajaxedit_send(plugin,idx_tag,fcnSuccess,data){
-	data['pageid']=JSINFO['id'];
-	data['lastmod']=LASTMOD;
+	data['pageid']=data['pageid']?data['pageid']:JSINFO['id'];
 	data['sectok']=JSINFO['sectok'];
 	data['id']=idx_tag;
 	data['index']=idx_tag;
-	jQuery.post(
-		DOKU_BASE+'lib/plugins/'+plugin+'/ajax.php',
-		data,
-		fcnSuccess
-	);
+
+	url = DOKU_BASE+'lib/plugins/'+plugin+'/ajax.php';
+    ajaxedit_queue(function(){ajaxedit_send_(url,data,fcnSuccess)});
+
 }
 
 /**
@@ -54,7 +84,20 @@ function ajaxedit_checkResponse(response){
 		}
 		jQuery('#ajaxedit__dialog_div').html(response.msg);
 		return false;
-	}
+	} else if(response.msg){
+        
+        jQuery.pnotify({
+            title: false,
+            text: response.msg?response.msg:'gespeichert',
+            type: 'success',
+            icon: false,
+            animate_speed: 100,
+            animation: {
+                effect_in:'bounce',
+                effect_out:'drop',
+            }
+        });
+    }
 	
 	LASTMOD = ret.lastmod;
 	return true;
@@ -63,8 +106,9 @@ function ajaxedit_checkResponse(response){
 
 function ajaxedit_getIdxByIdClass(id,classname) {
 	tag_type = jQuery("#"+id).prop('tagName');
+    id = jQuery("#"+id).attr('id');
 	$els = jQuery(tag_type+"."+classname);
-
+    
 	for(ii=0,kk=0;ii<$els.size();ii++){
 		if($els[ii].id == id) return kk;
 		kk++; 
@@ -73,7 +117,8 @@ function ajaxedit_getIdxByIdClass(id,classname) {
 
 function ajaxedit_getIdxByIdClassNodeid(id,classname,nodeid) {
 	tag_type = jQuery("#"+id).prop('tagName');
-	$els = jQuery('#'+nodeid +" > "+tag_type+"."+classname);
+	id = jQuery("#"+id).attr('id');
+    $els = jQuery('#'+nodeid +" > "+tag_type+"."+classname);
 
 	for(ii=0;ii<$els.size();ii++){
 		if($els[ii].id == id) {
@@ -81,3 +126,9 @@ function ajaxedit_getIdxByIdClassNodeid(id,classname,nodeid) {
 		}	 
 	}
 }
+
+jQuery(window).on('beforeunload',function(e){
+    if(ajaxedit_queue_working) {
+        return LANG.plugins.ajaxedit.tasks_left.replace('{0}',(ajaxedit_queue_.length *1 +1)) ;
+    }
+});
