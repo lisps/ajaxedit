@@ -17,7 +17,7 @@ class action_plugin_ajaxedit extends DokuWiki_Action_Plugin {
 	/**
 	 * Register the eventhandlers
 	 */
-	function register(&$controller) {
+	function register(Doku_Event_Handler $controller) {
 		$controller->register_hook('DOKUWIKI_STARTED', 'AFTER',  $this, '_addlastmod');
 	}
 	function _addlastmod(&$event, $param) {
