@@ -10,4 +10,5 @@ $lang['e_modified'] = "<h1>Achtung!</h1>".
 				"Ihre Änderungen wurden nicht Übernommen.<br>".
 				"Bitte laden Sie diese Seite neu und wiederholen die Änderung!<br><br>".
 				"<input type='button' value='Neu laden' onclick='window.location.reload()'>";
-				
+$lang['changed_from_to'] = "%s geändert von %s zu %s";
+$lang['js']['tasks_left'] = "Es sind noch {0} Hintergrundaufgaben offen."; 
