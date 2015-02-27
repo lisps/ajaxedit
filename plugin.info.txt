@@ -1,7 +1,7 @@
 base    ajaxedit
 author  lisps
 email   
-date    2013-10-24
+date    2015-02-27
 name    ajaxedit helper plugin
 desc    Framework for easy ajax editing
 url     http://dokuwiki.org/plugin:ajaxedit

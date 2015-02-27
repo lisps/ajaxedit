@@ -6,6 +6,7 @@
  * @author lisps
  */
 
+
 var LASTMOD = JSINFO?JSINFO['lastmod']:null;
 jQuery.pnotify.defaults.styling = "jqueryui";
 jQuery.pnotify.defaults.delay = 2000;
@@ -22,7 +23,7 @@ function ajaxedit_queue(callback) {
     }
 }
 function ajaexedit_queue_next(){
-    c = ajaxedit_queue_.pop();
+    var c = ajaxedit_queue_.pop();
     if(c) c();
     else  ajaxedit_queue_working = false;
 }
@@ -54,7 +55,27 @@ function ajaxedit_send(plugin,idx_tag,fcnSuccess,data){
 	data['id']=idx_tag;
 	data['index']=idx_tag;
 
-	url = DOKU_BASE+'lib/plugins/'+plugin+'/ajax.php';
+	var url = DOKU_BASE+'lib/plugins/'+plugin+'/ajax.php';
+    ajaxedit_queue(function(){ajaxedit_send_(url,data,fcnSuccess)});
+
+}
+
+/**
+ * ajaxedit_send is a wrapper for jQuery's post function 
+ * it automatically adds the current pageid, lastmod and the security token
+ * 
+ * @param string   plugin plugin name
+ * @param int      idx_tag the id counter
+ * @param function fcnSuccess callback function
+ * @param hash     data additional data
+ */
+function ajaxedit_send2(plugin,idx_tag,fcnSuccess,data){
+	data['pageid']=data['pageid']?data['pageid']:JSINFO['id'];
+	data['sectok']=JSINFO['sectok'];
+	data['id']=idx_tag;
+	data['index']=idx_tag;
+	data['call']='plugin_'+plugin;
+	var url = DOKU_BASE+'lib/exe/ajax.php';
     ajaxedit_queue(function(){ajaxedit_send_(url,data,fcnSuccess)});
 
 }
@@ -91,6 +112,7 @@ function ajaxedit_checkResponse(response){
             text: response.msg?response.msg:'gespeichert',
             type: 'success',
             icon: false,
+            delay: response.notifyDelay?response.notifyDelay*1000:2000,
             animate_speed: 100,
             animation: {
                 effect_in:'bounce',
@@ -98,29 +120,28 @@ function ajaxedit_checkResponse(response){
             }
         });
     }
-	
-	LASTMOD = ret.lastmod;
+	if(response.pageid === JSINFO['id']) LASTMOD = response.lastmod; //refresh LASTMOD
 	return true;
 }
 
 
 function ajaxedit_getIdxByIdClass(id,classname) {
-	tag_type = jQuery("#"+id).prop('tagName');
+	var tag_type = jQuery("#"+id).prop('tagName');
     id = jQuery("#"+id).attr('id');
-	$els = jQuery(tag_type+"."+classname);
+	var $els = jQuery(tag_type+"."+classname);
     
-	for(ii=0,kk=0;ii<$els.size();ii++){
+	for(var ii=0,kk=0;ii<$els.size();ii++){
 		if($els[ii].id == id) return kk;
 		kk++; 
 	}
 }
 
 function ajaxedit_getIdxByIdClassNodeid(id,classname,nodeid) {
-	tag_type = jQuery("#"+id).prop('tagName');
+	var tag_type = jQuery("#"+id).prop('tagName');
 	id = jQuery("#"+id).attr('id');
-    $els = jQuery('#'+nodeid +" > "+tag_type+"."+classname);
+    var $els = jQuery('#'+nodeid +" > "+tag_type+"."+classname);
 
-	for(ii=0;ii<$els.size();ii++){
+	for(var ii=0;ii<$els.size();ii++){
 		if($els[ii].id == id) {
 			return ii;
 		}	 

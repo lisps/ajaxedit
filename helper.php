@@ -47,7 +47,7 @@ class helper_plugin_ajaxedit extends DokuWiki_Plugin {
 		);
 		
 		echo json_encode($ret);
-		if($exit && !DOKU_UNITTEST) exit;
+		if($exit && !defined('DOKU_UNITTEST')) exit;
 	}
 	
 	function _error($type,$exit = true){
@@ -58,14 +58,15 @@ class helper_plugin_ajaxedit extends DokuWiki_Plugin {
 		);
 		
 		echo json_encode($ret);
-		if($exit && !DOKU_UNITTEST) exit;
+
+		if($exit && !defined('DOKU_UNITTEST')) exit;
 	}
 	
 	/**
 	 * getWikiPage returns the raw wiki data
 	 * @return string
 	 */
-	function getWikiPage(){
+	function getWikiPage($checkLastmod = true, $min_acl = AUTH_EDIT){
 		global $ID;
 		global $INFO;
 		$this->ID=cleanID(trim($_POST["pageid"]));
@@ -77,12 +78,12 @@ class helper_plugin_ajaxedit extends DokuWiki_Plugin {
 		
 		if(!checkSecurityToken()) $this->_error(self::ERROR_SECTOC);
 		
-		if (auth_quickaclcheck($ID) < AUTH_EDIT) {
+		if (auth_quickaclcheck($ID) < $min_acl) {
 			$this->_error(self::ERROR_ACL);
 		}
 		
 		$INFO = pageinfo();
-		if($INFO['lastmod']!=$oldrev ) {
+		if($checkLastmod && $INFO['lastmod']!=$oldrev ) {
 			$this->_error(self::ERROR_MODIFIED);
 		}
 		
@@ -103,6 +104,7 @@ class helper_plugin_ajaxedit extends DokuWiki_Plugin {
 	 * @param array $data additional data
 	 */
 	function success($data=array()){
+		global $ID;
 		$info = pageinfo();
 		
 		$ret = array(
@@ -110,6 +112,7 @@ class helper_plugin_ajaxedit extends DokuWiki_Plugin {
 			'msg'    => '',
 			'lastmod'=> $info['lastmod'],
 			'index'  => $this->index,
+			'pageid' => $ID,
 		);
 		$ret = array_merge($ret,$data);
 		echo json_encode($ret);
@@ -127,9 +130,12 @@ class helper_plugin_ajaxedit extends DokuWiki_Plugin {
 	 */
 	function saveWikiPage($data,$summary,$minor = false,$param=array(),$autosubmit=true){
 		saveWikiText($this->ID,$data,$summary,$minor);
+		
 		if($autosubmit){
 			$this->success($param);
 		}
+		global $INFO;
+		$INFO = pageinfo();
 	}
 	
 	function _getErrorMsg($error){
@@ -147,7 +153,7 @@ class helper_plugin_ajaxedit extends DokuWiki_Plugin {
 				$msg = 'ERROR_SECTOC:tbd';
 				break; 
 			case self::ERROR_ACL: 
-				$msg = 'ERROR_ACL:tbd';
+				$msg = p_locale_xhtml('denied');
 				break;	
 
 			case self::ERROR_READ: 
