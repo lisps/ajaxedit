@@ -8,10 +8,6 @@
  * @author  lisps
  */
 
-if (!defined('DOKU_INC')) die();
-if (!defined('DOKU_PLUGIN')) define('DOKU_PLUGIN', DOKU_INC . 'lib/plugins/');
-require_once (DOKU_PLUGIN . 'action.php');
-
 class action_plugin_ajaxedit extends DokuWiki_Action_Plugin {
 
 	/**
@@ -22,7 +18,7 @@ class action_plugin_ajaxedit extends DokuWiki_Action_Plugin {
 		$controller->register_hook('DOKUWIKI_STARTED', 'AFTER',  $this, 'fixsecedit');
 	}
 	function _addlastmod(&$event, $param) {
-		global $INFO;
+		global $ID;
 		global $JSINFO;
 		
 		$info = pageinfo();

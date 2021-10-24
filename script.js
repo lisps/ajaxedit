@@ -130,7 +130,7 @@ function ajaxedit_getIdxByIdClass(id,classname) {
     id = jQuery("#"+id).attr('id');
 	var $els = jQuery(tag_type+"."+classname);
     
-	for(var ii=0,kk=0;ii<$els.length;ii++){
+	for(var ii=0, kk=0; ii < $els.length; ii++){
 		if($els[ii].id == id) return kk;
 		kk++; 
 	}
@@ -141,7 +141,7 @@ function ajaxedit_getIdxByIdClassNodeid(id,classname,nodeid) {
 	id = jQuery("#"+id).attr('id');
     var $els = jQuery('#'+nodeid +" > "+tag_type+"."+classname);
 
-	for(var ii=0;ii<$els.length;ii++){
+	for(var ii=0; ii<$els.length; ii++){
 		if($els[ii].id == id) {
 			return ii;
 		}	 
