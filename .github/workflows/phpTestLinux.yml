@@ -10,10 +10,10 @@ jobs:
 
         strategy:
             matrix:
-                php-versions: ['7.2', '7.3', '7.4', '8.0']
-                dokuwiki-branch: [ 'master', 'stable', 'release_stable_2018-04-22a' ]
+                php-versions: ['5.6', '7.2', '7.3', '7.4', '8.0']
+                dokuwiki-branch: [ 'master', 'stable', 'old-stable' ]
                 exclude:
-                    -   dokuwiki-branch: 'stable'
+                    -   dokuwiki-branch: ['stable', 'old-stable']
                         php-versions: '8.0'
             fail-fast: false
 
